@@ -1,0 +1,20 @@
+apiVersion: v1
+entries:
+  prometheus-mcp-server:
+  - apiVersion: v2
+    appVersion: 0.0.55
+    created: "2025-12-19T22:01:56.649968094Z"
+    description: Helm Chart for the Prometheus MCP Server
+    digest: 1f44248ed3c55557203380a40fc10e49a0124e5b1c676d6d4fd2894152f1fe17
+    home: https://github.com/pab1it0/prometheus-mcp-server
+    keywords:
+    - prometheus
+    - mcp
+    maintainers:
+    - email: leoligz@hotmail.com
+      name: Leo Li
+    name: prometheus-mcp-server
+    urls:
+    - https://github.com/leoligz-org/prometheus-mcp-server/releases/download/prometheus-mcp-server-0.1.0/prometheus-mcp-server-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-12-19T22:01:56.649991007Z"
