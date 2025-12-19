@@ -12,6 +12,10 @@ import dotenv
 import requests
 from fastmcp import FastMCP, Context
 from prometheus_mcp_server.logging_config import get_logger
+from prometheus_mcp_server.middleware import (
+    StripUnknownArgumentsMiddleware,
+    ResponseMetadataMiddleware,
+)
 
 dotenv.load_dotenv()
 mcp = FastMCP("Prometheus MCP")
@@ -501,6 +505,39 @@ async def get_targets() -> Dict[str, List[Dict[str, Any]]]:
     
     return result
 
+
+def app() -> FastMCP:
+    """Create and configure the FastMCP application instance with middlewares."""
+    # The global mcp instance is already created with all the tool decorators
+    # Now we add middlewares to it
+    mcp.add_middleware(StripUnknownArgumentsMiddleware())
+    mcp.add_middleware(ResponseMetadataMiddleware())
+    return mcp
+
+
+def main():
+    """Main entry point for the Prometheus MCP Server."""
+    logger.info("Starting Prometheus MCP Server with middlewares", mode="main")
+    
+    # Get the app with middlewares
+    mcp_app = app()
+    
+    # Determine transport from config
+    transport = config.mcp_server_config.mcp_server_transport if config.mcp_server_config else "stdio"
+    
+    http_transports = [TransportType.HTTP.value, TransportType.SSE.value]
+    if transport in http_transports:
+        host = config.mcp_server_config.mcp_bind_host if config.mcp_server_config else "127.0.0.1"
+        port = config.mcp_server_config.mcp_bind_port if config.mcp_server_config else 8080
+        logger.info("Starting Prometheus MCP Server", 
+                    transport=transport, 
+                    host=host,
+                    port=port)
+        mcp_app.run(transport=transport, host=host, port=port)
+    else:
+        logger.info("Starting Prometheus MCP Server", transport=transport)
+        mcp_app.run(transport=transport)
+
+
 if __name__ == "__main__":
-    logger.info("Starting Prometheus MCP Server", mode="direct")
-    mcp.run()
+    main()

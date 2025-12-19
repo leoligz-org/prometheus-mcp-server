@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import dotenv
-from prometheus_mcp_server.server import mcp, config, TransportType
+from prometheus_mcp_server.server import app, config, TransportType
 from prometheus_mcp_server.logging_config import setup_logging
 
 # Initialize structured logging
@@ -69,19 +69,22 @@ def run_server():
         logger.error("Environment setup failed, exiting")
         sys.exit(1)
     
+    # Get the app with middlewares configured
+    mcp_app = app()
+    
     mcp_config = config.mcp_server_config
     transport = mcp_config.mcp_server_transport
 
     http_transports = [TransportType.HTTP.value, TransportType.SSE.value]
     if transport in http_transports:
-        mcp.run(transport=transport, host=mcp_config.mcp_bind_host, port=mcp_config.mcp_bind_port)
-        logger.info("Starting Prometheus MCP Server", 
+        logger.info("Starting Prometheus MCP Server with middlewares", 
                 transport=transport, 
                 host=mcp_config.mcp_bind_host,
                 port=mcp_config.mcp_bind_port)
+        mcp_app.run(transport=transport, host=mcp_config.mcp_bind_host, port=mcp_config.mcp_bind_port)
     else:
-        mcp.run(transport=transport)
-        logger.info("Starting Prometheus MCP Server", transport=transport)
+        logger.info("Starting Prometheus MCP Server with middlewares", transport=transport)
+        mcp_app.run(transport=transport)
 
 if __name__ == "__main__":
     run_server()
