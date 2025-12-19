@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "prometheus-mcp-server.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "prometheus-mcp-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "prometheus-mcp-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- tpl (toYaml .) . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "prometheus-mcp-server.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- tpl (toYaml .) . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- tpl (toYaml .) . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "prometheus-mcp-server.serviceAccountName" . }}
+      securityContext:
+        {{- tpl (toYaml (default .Values.defaultPodSecurityContext .Values.podSecurityContext)) . | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- tpl (toYaml (default .Values.defaultSecurityContext .Values.securityContext)) . | nindent 12 }}
+          image: "{{ template "prometheus-mcp-server.image" .Values.image }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ include "prometheus-mcp-server.fullname" . }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- tpl (toYaml .) . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- tpl (toYaml .) . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- tpl (toYaml .) . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.extraVolumeMounts }}
+            {{- tpl (toYaml .) . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.extraVolumes }}
+      volumes:
+        {{- tpl (toYaml .) . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- tpl (toYaml .) . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- tpl (toYaml .) . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- tpl (toYaml .) . | nindent 8 }}
+      {{- end }}

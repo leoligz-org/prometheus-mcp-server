@@ -1,0 +1,18 @@
+name: Docker Image Builds
+
+on:
+  push:
+    # Pattern matched against refs/tags
+    tags:        
+      - '*'           # Push events to every tag not containing /
+
+jobs:
+  reusable-build-workflows:
+    uses: leoligz-org/reusable-workflows/.github/workflows/release-image.yml@main
+    secrets: inherit # This passes all available secrets to the called workflow
+    permissions:
+      contents: read # read the repository
+      packages: write # push to GHCR, omit if not pushing to GitHub's container registry
+    with:
+      ghcr: true
+      private: true

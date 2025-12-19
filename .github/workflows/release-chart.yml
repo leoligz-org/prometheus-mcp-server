@@ -1,0 +1,15 @@
+name: Release Charts
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  reusable-build-workflows:
+    uses: leoligz-org/reusable-workflows/.github/workflows/release-chart.yml@main
+    secrets: inherit # This passes all available secrets to the called workflow
+    permissions:
+      contents: write

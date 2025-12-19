@@ -1,0 +1,12 @@
+apiVersion: v2
+appVersion: 0.0.55
+description: Helm Chart for the Prometheus MCP Server
+home: https://github.com/pab1it0/prometheus-mcp-server
+keywords:
+- prometheus
+- mcp
+maintainers:
+- email: leoligz@hotmail.com
+  name: Leo Li
+name: prometheus-mcp-server
+version: 0.1.0

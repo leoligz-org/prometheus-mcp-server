@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "prometheus-mcp-server.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "prometheus-mcp-server.labels" . | nindent 4 }}
+data:
+  # Iterate over the key-value pairs in .Values.config
+{{- range $key, $value := .Values.config }}
+  {{ $key }}: "{{ $value }}"
+{{- end }}
